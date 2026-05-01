@@ -33,8 +33,6 @@ function cleanResponse(text: string): string {
     "handoff to:",
     "end of specialist chain",
     "summary for orchestr",
-    "summary table",
-    "key takeaways for",
     "if you wish",
     "for completeness",
     "i will now simulate",
@@ -138,6 +136,38 @@ export async function POST(req: NextRequest) {
   const finalCMO = [...agentResults].reverse().find((r) => r.isCMO);
   const specialistResults = agentResults.filter((r) => !r.isCMO && !r.isOrchestrator);
 
+  // Generate next-step prompts based on the synthesis
+  const nextStepResponse = await client.responses.create({
+    model: "gpt-4.1",
+    temperature: 0.3,
+    instructions: `You are a strategic marketing advisor. Based on the CMO executive recommendation provided, generate 3–4 specific, actionable next-step prompts the user could ask to continue the work.
+
+Each prompt should be a ready-to-use question or instruction. Cover a mix of:
+- Requesting missing data or research
+- Building a specific campaign, workflow, or playbook
+- Going deeper on a specific finding
+- Requesting a deliverable (e.g. messaging framework, scoring model, dashboard)
+
+Format as a JSON array of strings only. No explanation, no preamble, just the array.
+Example: ["Build a 60-day campaign plan targeting spreadsheet users", "What data do we need to validate the ICP hypothesis?"]`,
+    input: [{ role: "user", content: `CMO Synthesis:\n${finalCMO?.response ?? ""}\n\nOriginal Request:\n${fullRequest}` }],
+  });
+
+  const nextStepText = nextStepResponse.output
+    .find((item): item is OpenAI.Responses.ResponseOutputMessage => item.type === "message")
+    ?.content
+    .filter((c): c is OpenAI.Responses.ResponseOutputText => c.type === "output_text")
+    .map((c) => c.text)
+    .join("") ?? "[]";
+
+  let nextSteps: string[] = [];
+  try {
+    const match = nextStepText.match(/\[[\s\S]*\]/);
+    nextSteps = match ? JSON.parse(match[0]) : [];
+  } catch {
+    nextSteps = [];
+  }
+
   return NextResponse.json({
     ok: true,
     flowKey,
@@ -146,5 +176,6 @@ export async function POST(req: NextRequest) {
     agentResults,
     specialistResults,
     synthesis: finalCMO?.response ?? "",
+    nextSteps,
   });
 }

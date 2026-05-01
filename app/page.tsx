@@ -57,6 +57,7 @@ interface OrchestrateResponse {
   agentResults: AgentResult[];
   specialistResults: AgentResult[];
   synthesis: string;
+  nextSteps: string[];
 }
 
 // ─── Flow Badge ──────────────────────────────────────────────────────────────
@@ -357,6 +358,41 @@ export default function Home() {
                   Final Executive Recommendation
                 </h2>
                 <SynthesisPanel synthesis={result.synthesis} />
+              </div>
+            )}
+
+            {/* Next Steps */}
+            {result.nextSteps && result.nextSteps.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-xs font-semibold text-white/30 uppercase tracking-widest mb-4">
+                  Suggested Next Steps
+                </h2>
+                <div
+                  className="rounded-2xl border p-6"
+                  style={{ background: "#0d1117", borderColor: "#6366f133" }}
+                >
+                  <p className="text-xs text-white/40 mb-4">
+                    Click any prompt below to continue the analysis.
+                  </p>
+                  <div className="space-y-3">
+                    {result.nextSteps.map((step, i) => (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          setUserRequest(step);
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                        className="w-full text-left px-4 py-3 rounded-xl border text-sm text-white/70 hover:text-white transition-all hover:border-white/20 flex items-start gap-3"
+                        style={{ background: "#161b27", borderColor: "#ffffff0f" }}
+                      >
+                        <span className="flex-shrink-0 mt-0.5 text-xs font-bold px-1.5 py-0.5 rounded" style={{ background: "#6366f122", color: "#818cf8" }}>
+                          {i + 1}
+                        </span>
+                        {step}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </>
