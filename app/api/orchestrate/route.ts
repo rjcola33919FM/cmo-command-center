@@ -43,24 +43,21 @@ export async function POST(req: NextRequest) {
     : userRequest;
 
   const agentResults: AgentResult[] = [];
-  let messages: OpenAI.Responses.ResponseInputItem[] = [
-    { role: "user", content: fullRequest },
-  ];
 
   for (const agentKey of chain) {
     const meta = AGENTS[agentKey];
     const systemPrompt = AGENT_PROMPTS[agentKey];
 
-    // Build context summary from prior agents for this agent
-    const priorContext = agentResults.length > 0
-      ? `\n\nPrior agent findings:\n${agentResults.map((r) => `=== ${r.name} ===\n${r.response}`).join("\n\n")}`
+    // Each agent gets a clean call: original request + structured prior findings injected into instructions
+    const priorFindings = agentResults.length > 0
+      ? `\n\n---\nPRIOR SPECIALIST FINDINGS (for context only — do not re-analyze, do not route):\n${agentResults.map((r) => `=== ${r.name} ===\n${r.response}`).join("\n\n")}`
       : "";
 
     const agentResponse = await client.responses.create({
       model: "gpt-4.1",
       temperature: 0.2,
-      instructions: systemPrompt + priorContext,
-      input: messages,
+      instructions: systemPrompt + priorFindings,
+      input: [{ role: "user", content: fullRequest }],
     });
 
     const textOutput = agentResponse.output.find(
@@ -80,13 +77,6 @@ export async function POST(req: NextRequest) {
       response: responseText,
       isCMO: agentKey === "cmo-gpt",
       isOrchestrator: agentKey === "marketing-orchestrator-gpt",
-    });
-
-    // Add agent response to message history for next agent
-    messages.push(...(agentResponse.output as OpenAI.Responses.ResponseInputItem[]));
-    messages.push({
-      role: "user",
-      content: `Continue. The next agent in the chain should now provide their specialist analysis.`,
     });
   }
 
