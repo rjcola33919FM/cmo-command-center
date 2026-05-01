@@ -9,8 +9,6 @@ import {
   type FlowKey,
 } from "@/app/lib/agents";
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
 interface AgentResult {
   agent: AgentKey;
   name: string;
@@ -24,6 +22,8 @@ export async function POST(req: NextRequest) {
   if (!process.env.OPENAI_API_KEY) {
     return NextResponse.json({ ok: false, error: "OPENAI_API_KEY is missing" }, { status: 500 });
   }
+
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   const { userRequest, businessContext } = await req.json() as {
     userRequest: string;
