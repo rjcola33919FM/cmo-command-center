@@ -94,7 +94,14 @@ const OPERATING_RULES = `Operating Rules:
 2. Separate facts, assumptions, risks, and recommendations.
 3. Flag missing evidence instead of inventing facts.
 4. Return structured, usable findings.
-5. Do NOT suggest routing to agents that are not in the defined chain. Do NOT invent new specialist agents. Do NOT include "Next Step" routing instructions in your response — the orchestration system handles routing automatically.`;
+
+STRICT OUTPUT RULES — violations will break the system:
+- NEVER begin your response with "Routing to:", "Next agent:", "Handoff to:", or any routing language.
+- NEVER end your response with routing instructions, "Summary for Orchestration", "End of Specialist Chain", or any language suggesting a next step.
+- NEVER mention other agents by name in your response.
+- NEVER describe the orchestration process or your position in the chain.
+- Your response must begin immediately with your analysis. Start with a heading like "## Diagnosis" or "## [Your Specialty] Analysis".
+- Your response must end with your last finding or recommendation. Nothing else.`;
 
 export const AGENT_PROMPTS: Record<AgentKey, string> = {
   "cmo-gpt": `You are the CMO GPT — Executive CMO Strategist. You own the final executive recommendation and board-ready synthesis.
