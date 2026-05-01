@@ -18,6 +18,22 @@ interface AgentResult {
   isOrchestrator: boolean;
 }
 
+function cleanResponse(text: string): string {
+  // Strip any leading routing/handoff narration before the actual analysis
+  text = text.replace(
+    /^[\s\S]*?(Routing[\s\S]*?(?:Analysis|Diagnosis|Finding|Recommendation|Executive Summary|##))/i,
+    "$1"
+  );
+
+  // Strip trailing routing/handoff language
+  text = text.replace(
+    /\n+(?:Summary for Orche\w+|End of Specialist Chain|Next Step|Routing to|Handoff to|If you wish|For completeness|I will now simulate|The following functions|There are no further)[\s\S]*$/i,
+    ""
+  );
+
+  return text.trim();
+}
+
 export async function POST(req: NextRequest) {
   if (!process.env.OPENAI_API_KEY) {
     return NextResponse.json({ ok: false, error: "OPENAI_API_KEY is missing" }, { status: 500 });
@@ -74,7 +90,7 @@ export async function POST(req: NextRequest) {
       agent: agentKey,
       name: meta.name,
       role: meta.role,
-      response: responseText,
+      response: cleanResponse(responseText),
       isCMO: agentKey === "cmo-gpt",
       isOrchestrator: agentKey === "marketing-orchestrator-gpt",
     });
