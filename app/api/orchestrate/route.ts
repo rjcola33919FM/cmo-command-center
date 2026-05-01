@@ -29,14 +29,21 @@ function cleanResponse(text: string): string {
   const routingPrefixes = [
     "routing to:",
     "next step:",
+    "next specialist",
     "handoff to:",
     "end of specialist chain",
     "summary for orchestr",
+    "summary table",
+    "key takeaways for",
     "if you wish",
     "for completeness",
     "i will now simulate",
     "the following functions have",
     "there are no further",
+    "with the addition of",
+    "with the core",
+    "all core marketing",
+    "the cmo and executive team should",
   ];
 
   for (const line of lines) {
