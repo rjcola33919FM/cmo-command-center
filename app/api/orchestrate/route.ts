@@ -9,6 +9,9 @@ import {
   type FlowKey,
 } from "@/app/lib/agents";
 
+// Allow up to 300s on Vercel Pro; hobby plan caps at 60s
+export const maxDuration = 300;
+
 interface AgentResult {
   agent: AgentKey;
   name: string;
@@ -19,19 +22,40 @@ interface AgentResult {
 }
 
 function cleanResponse(text: string): string {
-  // Strip any leading routing/handoff narration before the actual analysis
-  text = text.replace(
-    /^[\s\S]*?(Routing[\s\S]*?(?:Analysis|Diagnosis|Finding|Recommendation|Executive Summary|##))/i,
-    "$1"
-  );
+  const lines = text.split("\n");
+  const cleanedLines: string[] = [];
+  let started = false;
 
-  // Strip trailing routing/handoff language
-  text = text.replace(
-    /\n+(?:Summary for Orche\w+|End of Specialist Chain|Next Step|Routing to|Handoff to|If you wish|For completeness|I will now simulate|The following functions|There are no further)[\s\S]*$/i,
-    ""
-  );
+  const routingPrefixes = [
+    "routing to:",
+    "next step:",
+    "handoff to:",
+    "end of specialist chain",
+    "summary for orchestr",
+    "if you wish",
+    "for completeness",
+    "i will now simulate",
+    "the following functions have",
+    "there are no further",
+  ];
 
-  return text.trim();
+  for (const line of lines) {
+    const lower = line.toLowerCase().trim();
+
+    // Skip leading blank lines and routing preamble before analysis starts
+    if (!started) {
+      if (routingPrefixes.some((p) => lower.startsWith(p))) continue;
+      if (lower === "") continue;
+      started = true;
+    }
+
+    // Stop at trailing routing/summary sections
+    if (routingPrefixes.some((p) => lower.startsWith(p))) break;
+
+    cleanedLines.push(line);
+  }
+
+  return cleanedLines.join("\n").trim();
 }
 
 export async function POST(req: NextRequest) {
@@ -41,10 +65,14 @@ export async function POST(req: NextRequest) {
 
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  const { userRequest, businessContext } = await req.json() as {
-    userRequest: string;
-    businessContext?: string;
-  };
+  let body: { userRequest?: string; businessContext?: string };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ ok: false, error: "Invalid request body" }, { status: 400 });
+  }
+
+  const { userRequest, businessContext } = body;
 
   if (!userRequest?.trim()) {
     return NextResponse.json({ ok: false, error: "No request provided" }, { status: 400 });
@@ -60,43 +88,46 @@ export async function POST(req: NextRequest) {
 
   const agentResults: AgentResult[] = [];
 
-  for (const agentKey of chain) {
-    const meta = AGENTS[agentKey];
-    const systemPrompt = AGENT_PROMPTS[agentKey];
+  try {
+    for (const agentKey of chain) {
+      const meta = AGENTS[agentKey];
+      const systemPrompt = AGENT_PROMPTS[agentKey];
 
-    // Each agent gets a clean call: original request + structured prior findings injected into instructions
-    const priorFindings = agentResults.length > 0
-      ? `\n\n---\nPRIOR SPECIALIST FINDINGS (for context only — do not re-analyze, do not route):\n${agentResults.map((r) => `=== ${r.name} ===\n${r.response}`).join("\n\n")}`
-      : "";
+      const priorFindings = agentResults.length > 0
+        ? `\n\n---\nPRIOR SPECIALIST FINDINGS (read-only context — do not re-analyze, do not route):\n${agentResults.map((r) => `=== ${r.name} ===\n${r.response}`).join("\n\n")}`
+        : "";
 
-    const agentResponse = await client.responses.create({
-      model: "gpt-4.1",
-      temperature: 0.2,
-      instructions: systemPrompt + priorFindings,
-      input: [{ role: "user", content: fullRequest }],
-    });
+      const agentResponse = await client.responses.create({
+        model: "gpt-4.1",
+        temperature: 0.2,
+        instructions: systemPrompt + priorFindings,
+        input: [{ role: "user", content: fullRequest }],
+      });
 
-    const textOutput = agentResponse.output.find(
-      (item): item is OpenAI.Responses.ResponseOutputMessage => item.type === "message"
-    );
+      const textOutput = agentResponse.output.find(
+        (item): item is OpenAI.Responses.ResponseOutputMessage => item.type === "message"
+      );
 
-    const responseText =
-      textOutput?.content
-        .filter((c): c is OpenAI.Responses.ResponseOutputText => c.type === "output_text")
-        .map((c) => c.text)
-        .join("") ?? "";
+      const responseText =
+        textOutput?.content
+          .filter((c): c is OpenAI.Responses.ResponseOutputText => c.type === "output_text")
+          .map((c) => c.text)
+          .join("") ?? "";
 
-    agentResults.push({
-      agent: agentKey,
-      name: meta.name,
-      role: meta.role,
-      response: cleanResponse(responseText),
-      isCMO: agentKey === "cmo-gpt",
-      isOrchestrator: agentKey === "marketing-orchestrator-gpt",
-    });
+      agentResults.push({
+        agent: agentKey,
+        name: meta.name,
+        role: meta.role,
+        response: cleanResponse(responseText),
+        isCMO: agentKey === "cmo-gpt",
+        isOrchestrator: agentKey === "marketing-orchestrator-gpt",
+      });
+    }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Agent chain failed";
+    return NextResponse.json({ ok: false, error: msg }, { status: 500 });
   }
 
-  // The last CMO response is the final synthesis
   const finalCMO = [...agentResults].reverse().find((r) => r.isCMO);
   const specialistResults = agentResults.filter((r) => !r.isCMO && !r.isOrchestrator);
 
