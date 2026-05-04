@@ -34,6 +34,8 @@ function cleanResponse(text: string): string {
     "routing:",
     "[routing",
     "next specialist",
+    "next agent",
+    "the next agent",
     "handoff to:",
     "hand-off:",
     "hand-off to:",
@@ -50,6 +52,9 @@ function cleanResponse(text: string): string {
     "all core marketing",
     "immediate executive action required",
     "this plan is designed for rapid execution",
+    "if you require vendor",
+    "prepared for board",
+    "board-ready synthesis",
   ];
 
   for (const line of lines) {
