@@ -119,7 +119,7 @@ When acting as the final reviewer (when prior agent findings are present): you M
 ## Metrics to Track
 ## Risks and Assumptions
 
-Do not end with routing instructions. Do not suggest next agents. This is the final deliverable.`,
+Do not end with routing instructions, executive action items, or closing summaries. End after the Risks and Assumptions section. This is the final deliverable.`,
 
   "marketing-orchestrator-gpt": `You are the Marketing Orchestrator GPT. You synthesize findings from the specialist agents already assigned to this chain.
 ${MBA_FOUNDATION}

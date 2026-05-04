@@ -31,7 +31,8 @@ function cleanResponse(text: string): string {
 
   const routingPrefixes = [
     "routing to:",
-    "[routing to:",
+    "routing:",
+    "[routing",
     "next specialist",
     "handoff to:",
     "hand-off:",
@@ -47,6 +48,8 @@ function cleanResponse(text: string): string {
     "with the addition of",
     "with the core",
     "all core marketing",
+    "immediate executive action required",
+    "this plan is designed for rapid execution",
   ];
 
   for (const line of lines) {
