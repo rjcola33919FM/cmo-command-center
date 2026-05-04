@@ -209,8 +209,8 @@ export const FLOWS: Record<FlowKey, Flow> = {
   },
   campaign_performance: {
     name: "Campaign Performance",
-    description: "Campaign, conversion, traffic, lead quality, CAC, or funnel",
-    triggerTerms: ["campaign", "conversion", "traffic", "lead quality", "cac", "funnel", "performance", "roas", "roi"],
+    description: "Campaign, ads, lead gen, conversion, traffic, lead quality, CAC, or funnel",
+    triggerTerms: ["campaign", "conversion", "traffic", "lead quality", "cac", "funnel", "performance", "roas", "roi", "meta ads", "facebook ads", "google ads", "lead gen", "lead generation", "lead form", "ad budget", "ads manager", "ppc", "paid ads", "paid media", "ad spend", "speed to lead", "follow-up", "follow up", "qualify", "qualifying"],
     chain: ["cmo-gpt", "google-analytics-gpt", "hubspot-crm-gpt", "marketing-strategy-gpt", "marketing-automation-gpt", "data-visualization-gpt", "marketing-orchestrator-gpt", "cmo-gpt"],
   },
   crm_lifecycle: {
