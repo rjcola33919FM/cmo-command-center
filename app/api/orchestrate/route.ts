@@ -22,13 +22,18 @@ interface AgentResult {
 }
 
 function cleanResponse(text: string): string {
+  // Strip bracketed routing headers like [Routing to: CMO GPT — ...]
+  text = text.replace(/^\[.*?(?:routing|handoff|next agent|specialist).*?\]\n*/i, "");
+
   const lines = text.split("\n");
   const cleanedLines: string[] = [];
   let started = false;
 
   const routingPrefixes = [
     "routing to:",
+    "[routing to:",
     "next step:",
+    "next steps:",
     "next specialist",
     "handoff to:",
     "end of specialist chain",
@@ -42,6 +47,10 @@ function cleanResponse(text: string): string {
     "with the core",
     "all core marketing",
     "the cmo and executive team should",
+    "this integrated",
+    "assign an owner",
+    "pilot the recommended",
+    "use the executive dashboard to drive",
   ];
 
   for (const line of lines) {
