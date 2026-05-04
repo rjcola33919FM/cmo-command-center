@@ -145,33 +145,36 @@ export async function POST(req: NextRequest) {
   const specialistResults = agentResults.filter((r) => !r.isCMO && !r.isOrchestrator);
 
   // Generate next-step prompts based on the synthesis
-  const nextStepResponse = await client.responses.create({
-    model: "gpt-4.1",
-    temperature: 0.3,
-    instructions: `You are a strategic marketing advisor. Based on the CMO executive recommendation provided, generate 3–4 specific, actionable next-step prompts the user could ask to continue the work.
-
-Each prompt should be a ready-to-use question or instruction. Cover a mix of:
-- Requesting missing data or research
-- Building a specific campaign, workflow, or playbook
-- Going deeper on a specific finding
-- Requesting a deliverable (e.g. messaging framework, scoring model, dashboard)
-
-Format as a JSON array of strings only. No explanation, no preamble, just the array.
-Example: ["Build a 60-day campaign plan targeting spreadsheet users", "What data do we need to validate the ICP hypothesis?"]`,
-    input: [{ role: "user", content: `CMO Synthesis:\n${finalCMO?.response ?? ""}\n\nOriginal Request:\n${fullRequest}` }],
-  });
-
-  const nextStepText = nextStepResponse.output
-    .find((item): item is OpenAI.Responses.ResponseOutputMessage => item.type === "message")
-    ?.content
-    .filter((c): c is OpenAI.Responses.ResponseOutputText => c.type === "output_text")
-    .map((c) => c.text)
-    .join("") ?? "[]";
-
   let nextSteps: string[] = [];
   try {
-    const match = nextStepText.match(/\[[\s\S]*\]/);
-    nextSteps = match ? JSON.parse(match[0]) : [];
+    const nextStepResponse = await client.responses.create({
+      model: "gpt-4.1",
+      temperature: 0.3,
+      instructions: `You are a strategic marketing advisor. Based on the CMO recommendation and original request, generate exactly 4 specific follow-up prompts the user could submit next.
+
+Cover a mix of: requesting missing data, building a campaign or playbook, going deeper on a finding, or requesting a specific deliverable.
+
+Output ONLY 4 lines. Each line must start with "- " followed by the prompt. No numbering, no headers, no explanation.
+
+Example output:
+- Build a 6-week Meta ad campaign plan targeting emergency HVAC repair leads in Dallas
+- What lead response automation workflow should we set up in HubSpot before peak season?
+- Create a weekly dashboard template to track cost per booked job by channel
+- What questions should we add to our lead form to improve intent scoring?`,
+      input: [{ role: "user", content: `Original Request:\n${fullRequest}\n\nCMO Recommendation:\n${finalCMO?.response ?? ""}` }],
+    });
+
+    const nextStepText = nextStepResponse.output
+      .find((item): item is OpenAI.Responses.ResponseOutputMessage => item.type === "message")
+      ?.content
+      .filter((c): c is OpenAI.Responses.ResponseOutputText => c.type === "output_text")
+      .map((c) => c.text)
+      .join("") ?? "";
+
+    nextSteps = nextStepText
+      .split("\n")
+      .map((l) => l.replace(/^[-*•]\s*/, "").trim())
+      .filter((l) => l.length > 10);
   } catch {
     nextSteps = [];
   }
