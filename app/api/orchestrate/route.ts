@@ -104,18 +104,62 @@ export async function POST(req: NextRequest) {
     ? `Business Context:\n${businessContext}\n\nMarketing Problem / Request:\n${userRequest}`
     : userRequest;
 
-  const agentResults: AgentResult[] = [];
+  // Split chain into: [opening CMO] + [specialists] + [orchestrator] + [final CMO]
+  const openingCMO = chain[0]; // always cmo-gpt
+  const finalCMOKey = chain[chain.length - 1]; // always cmo-gpt
+  const orchestratorKey = chain[chain.length - 2]; // always marketing-orchestrator-gpt
+  const specialistKeys = chain.slice(1, chain.length - 2); // everything in between
+
+  async function callAgent(agentKey: AgentKey, instructions: string): Promise<AgentResult> {
+    const meta = AGENTS[agentKey];
+    const res = await client.responses.create({
+      model: "gpt-4.1",
+      temperature: 0.2,
+      instructions,
+      input: [{ role: "user", content: fullRequest }],
+    });
+    const text = res.output
+      .find((i): i is OpenAI.Responses.ResponseOutputMessage => i.type === "message")
+      ?.content
+      .filter((c): c is OpenAI.Responses.ResponseOutputText => c.type === "output_text")
+      .map((c) => c.text)
+      .join("") ?? "";
+    return {
+      agent: agentKey,
+      name: meta.name,
+      role: meta.role,
+      response: cleanResponse(text),
+      isCMO: agentKey === "cmo-gpt",
+      isOrchestrator: agentKey === "marketing-orchestrator-gpt",
+    };
+  }
+
+  let agentResults: AgentResult[] = [];
 
   try {
-    for (const agentKey of chain) {
-      const meta = AGENTS[agentKey];
-      const isSecondCMO = agentKey === "cmo-gpt" && agentResults.some((r) => r.isCMO);
+    // Step 1: Opening CMO frame (sequential — sets context)
+    const openingResult = await callAgent(openingCMO, AGENT_PROMPTS[openingCMO]);
+    agentResults.push(openingResult);
 
-      // The final CMO call gets a locked synthesis prompt — no specialist analysis allowed
-      const systemPrompt = isSecondCMO
-        ? `You are the CMO GPT producing the FINAL board-ready executive recommendation. Your ONLY job is to synthesize the specialist findings below into an executive output. You are NOT a specialist. Do NOT produce more specialist analysis. Do NOT roleplay as any other agent.
+    // Step 2: All specialists in parallel — major speed improvement
+    const specialistResults = await Promise.all(
+      specialistKeys.map((key) => callAgent(key, AGENT_PROMPTS[key]))
+    );
+    agentResults.push(...specialistResults);
 
-You MUST use EXACTLY this structure and no other:
+    // Step 3: Orchestrator synthesizes all specialist findings
+    const allFindings = agentResults
+      .map((r) => `=== ${r.name} ===\n${r.response}`)
+      .join("\n\n");
+    const orchestratorInstructions = AGENT_PROMPTS[orchestratorKey] +
+      `\n\n---\nSPECIALIST FINDINGS TO SYNTHESIZE:\n${allFindings}`;
+    const orchestratorResult = await callAgent(orchestratorKey, orchestratorInstructions);
+    agentResults.push(orchestratorResult);
+
+    // Step 4: Final CMO synthesis — locked prompt only
+    const finalCMOInstructions = `You are the CMO GPT producing the FINAL board-ready executive recommendation. Your ONLY job is to synthesize the specialist findings below into an executive output. You are NOT a specialist. Do NOT produce more specialist analysis. Do NOT roleplay as any other agent.
+
+You MUST use EXACTLY this structure:
 
 ## Executive Summary
 ## Root-Cause Diagnosis
@@ -125,39 +169,18 @@ You MUST use EXACTLY this structure and no other:
 ## Metrics to Track
 ## Risks and Assumptions
 
-Begin your response with "## Executive Summary". End after "## Risks and Assumptions". Nothing before, nothing after.`
-        : AGENT_PROMPTS[agentKey];
+Begin your response with "## Executive Summary". End after "## Risks and Assumptions". Nothing before, nothing after.
 
-      const priorFindings = agentResults.length > 0
-        ? `\n\n---\nPRIOR SPECIALIST FINDINGS (read-only context — do not re-analyze, do not route):\n${agentResults.map((r) => `=== ${r.name} ===\n${r.response}`).join("\n\n")}`
-        : "";
+---
+SPECIALIST FINDINGS:
+${allFindings}
 
-      const agentResponse = await client.responses.create({
-        model: "gpt-4.1",
-        temperature: 0.2,
-        instructions: systemPrompt + priorFindings,
-        input: [{ role: "user", content: fullRequest }],
-      });
+ORCHESTRATOR SYNTHESIS:
+${orchestratorResult.response}`;
 
-      const textOutput = agentResponse.output.find(
-        (item): item is OpenAI.Responses.ResponseOutputMessage => item.type === "message"
-      );
+    const finalCMOResult = await callAgent(finalCMOKey, finalCMOInstructions);
+    agentResults.push(finalCMOResult);
 
-      const responseText =
-        textOutput?.content
-          .filter((c): c is OpenAI.Responses.ResponseOutputText => c.type === "output_text")
-          .map((c) => c.text)
-          .join("") ?? "";
-
-      agentResults.push({
-        agent: agentKey,
-        name: meta.name,
-        role: meta.role,
-        response: cleanResponse(responseText),
-        isCMO: agentKey === "cmo-gpt",
-        isOrchestrator: agentKey === "marketing-orchestrator-gpt",
-      });
-    }
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Agent chain failed";
     return NextResponse.json({ ok: false, error: msg }, { status: 500 });
