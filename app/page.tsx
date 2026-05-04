@@ -87,7 +87,8 @@ function FlowBadge({ flowKey, flowName }: { flowKey: FlowKey; flowName: string }
 // ─── Agent Card ──────────────────────────────────────────────────────────────
 
 function AgentCard({ result, index, total }: { result: AgentResult; index: number; total: number }) {
-  const [open, setOpen] = useState(false);
+  // Specialist agents open by default; CMO and orchestrator collapsed
+  const [open, setOpen] = useState(!result.isCMO && !result.isOrchestrator);
   const meta = AGENTS[result.agent];
 
   return (
@@ -344,7 +345,7 @@ export default function Home() {
             {/* Agent Pipeline */}
             <div className="mb-8">
               <h2 className="text-xs font-semibold text-white/30 uppercase tracking-widest mb-4">
-                Agent Pipeline — {result.agentResults.length} agents (click to expand)
+                Agent Pipeline — {result.agentResults.length} agents
               </h2>
               {result.agentResults.map((r, i) => (
                 <AgentCard key={`card-${i}`} result={r} index={i} total={result.agentResults.length} />

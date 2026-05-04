@@ -32,8 +32,6 @@ function cleanResponse(text: string): string {
   const routingPrefixes = [
     "routing to:",
     "[routing to:",
-    "next step:",
-    "next steps:",
     "next specialist",
     "handoff to:",
     "end of specialist chain",
@@ -46,11 +44,6 @@ function cleanResponse(text: string): string {
     "with the addition of",
     "with the core",
     "all core marketing",
-    "the cmo and executive team should",
-    "this integrated",
-    "assign an owner",
-    "pilot the recommended",
-    "use the executive dashboard to drive",
   ];
 
   for (const line of lines) {
