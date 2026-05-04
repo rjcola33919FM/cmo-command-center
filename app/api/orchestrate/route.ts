@@ -22,8 +22,8 @@ interface AgentResult {
 }
 
 function cleanResponse(text: string): string {
-  // Strip bracketed routing headers like [Routing to: CMO GPT — ...]
-  text = text.replace(/^\[.*?(?:routing|handoff|next agent|specialist).*?\]\n*/i, "");
+  // Strip ALL bracketed routing/handoff markers anywhere in text
+  text = text.replace(/\[.*?(?:routing|handoff|next agent|specialist).*?\]\n?/gi, "");
 
   const lines = text.split("\n");
   const cleanedLines: string[] = [];
@@ -74,6 +74,58 @@ function cleanResponse(text: string): string {
   }
 
   return cleanedLines.join("\n").trim();
+}
+
+// Strip hallucinated specialist agent blocks from CMO synthesis output
+function cleanSynthesis(text: string): string {
+  const VALID_HEADINGS = new Set([
+    "executive summary",
+    "root-cause diagnosis",
+    "key findings",
+    "recommended action plan",
+    "30/60/90-day execution plan",
+    "metrics to track",
+    "risks and assumptions",
+  ]);
+
+  // Remove inline routing brackets anywhere in synthesis
+  text = text.replace(/\[.*?(?:routing|handoff|next agent|specialist).*?\]\n?/gi, "");
+
+  const lines = text.split("\n");
+  const output: string[] = [];
+  let skipping = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const lower = trimmed.toLowerCase();
+
+    // Detect hallucinated specialist/agent section headers:
+    // "=== XYZ GPT ===" or heading containing "gpt"/"specialist" not in valid set
+    const headingText = lower.replace(/^#+\s*/, "").replace(/[*_]/g, "").trim();
+    const isHallucinatedHeader =
+      /^={2,}.*\b(gpt|specialist)\b.*={2,}$/i.test(trimmed) ||
+      (/^#{1,4}\s+/.test(trimmed) &&
+        /\b(gpt|specialist)\b/i.test(trimmed) &&
+        !VALID_HEADINGS.has(headingText));
+
+    if (isHallucinatedHeader) {
+      skipping = true;
+      continue;
+    }
+
+    if (skipping) {
+      // Resume at the next valid CMO heading
+      if (/^#{1,3}\s+/.test(trimmed) && VALID_HEADINGS.has(headingText)) {
+        skipping = false;
+        output.push(line);
+      }
+      continue;
+    }
+
+    output.push(line);
+  }
+
+  return output.join("\n").trim();
 }
 
 export async function POST(req: NextRequest) {
@@ -157,9 +209,15 @@ export async function POST(req: NextRequest) {
     agentResults.push(orchestratorResult);
 
     // Step 4: Final CMO synthesis — locked prompt only
-    const finalCMOInstructions = `You are the CMO GPT producing the FINAL board-ready executive recommendation. Your ONLY job is to synthesize the specialist findings below into an executive output. You are NOT a specialist. Do NOT produce more specialist analysis. Do NOT roleplay as any other agent.
+    const finalCMOInstructions = `You are the CMO GPT producing the FINAL board-ready executive recommendation.
 
-You MUST use EXACTLY this structure:
+CRITICAL CONSTRAINTS — violating any of these will break the system:
+- You are the CMO. You are NOT a specialist agent of any kind.
+- Do NOT invent, simulate, or roleplay as any agent that is not you.
+- Do NOT create sections named after any GPT, Agent, or Specialist (e.g., do NOT write "Data Governance GPT" or "Sales Enablement Specialist" — those do not exist).
+- The specialists have ALREADY responded. Their findings are given to you below. Do not add new specialist perspectives.
+- Do NOT include any routing language, handoff notes, or agent labels.
+- You MUST use EXACTLY these 7 section headings and no others:
 
 ## Executive Summary
 ## Root-Cause Diagnosis
@@ -169,16 +227,20 @@ You MUST use EXACTLY this structure:
 ## Metrics to Track
 ## Risks and Assumptions
 
-Begin your response with "## Executive Summary". End after "## Risks and Assumptions". Nothing before, nothing after.
+Begin with "## Executive Summary". End after "## Risks and Assumptions". Nothing before, nothing after.
 
 ---
-SPECIALIST FINDINGS:
+SPECIALIST FINDINGS (already collected — do not add more):
 ${allFindings}
 
 ORCHESTRATOR SYNTHESIS:
 ${orchestratorResult.response}`;
 
-    const finalCMOResult = await callAgent(finalCMOKey, finalCMOInstructions);
+    const rawFinalCMOResult = await callAgent(finalCMOKey, finalCMOInstructions);
+    const finalCMOResult = {
+      ...rawFinalCMOResult,
+      response: cleanSynthesis(rawFinalCMOResult.response),
+    };
     agentResults.push(finalCMOResult);
 
   } catch (err: unknown) {
