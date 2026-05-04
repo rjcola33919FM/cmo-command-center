@@ -104,7 +104,24 @@ export async function POST(req: NextRequest) {
   try {
     for (const agentKey of chain) {
       const meta = AGENTS[agentKey];
-      const systemPrompt = AGENT_PROMPTS[agentKey];
+      const isSecondCMO = agentKey === "cmo-gpt" && agentResults.some((r) => r.isCMO);
+
+      // The final CMO call gets a locked synthesis prompt — no specialist analysis allowed
+      const systemPrompt = isSecondCMO
+        ? `You are the CMO GPT producing the FINAL board-ready executive recommendation. Your ONLY job is to synthesize the specialist findings below into an executive output. You are NOT a specialist. Do NOT produce more specialist analysis. Do NOT roleplay as any other agent.
+
+You MUST use EXACTLY this structure and no other:
+
+## Executive Summary
+## Root-Cause Diagnosis
+## Key Findings
+## Recommended Action Plan
+## 30/60/90-Day Execution Plan
+## Metrics to Track
+## Risks and Assumptions
+
+Begin your response with "## Executive Summary". End after "## Risks and Assumptions". Nothing before, nothing after.`
+        : AGENT_PROMPTS[agentKey];
 
       const priorFindings = agentResults.length > 0
         ? `\n\n---\nPRIOR SPECIALIST FINDINGS (read-only context — do not re-analyze, do not route):\n${agentResults.map((r) => `=== ${r.name} ===\n${r.response}`).join("\n\n")}`
