@@ -8,12 +8,12 @@ import { AGENTS, FLOWS, type AgentKey, type FlowKey } from "@/app/lib/agents";
 // ─── Markdown Renderer (light theme) ─────────────────────────────────────────
 
 const mdComponents = {
-  h1: (p: ComponentPropsWithoutRef<"h1">) => <h1 className="text-xl font-bold mt-5 mb-3 text-gray-900 tracking-tight" {...p} />,
-  h2: (p: ComponentPropsWithoutRef<"h2">) => <h2 className="text-lg font-semibold mt-5 mb-3 text-gray-900 tracking-tight" {...p} />,
-  h3: (p: ComponentPropsWithoutRef<"h3">) => <h3 className="text-base font-semibold mt-4 mb-2 text-gray-800" {...p} />,
-  p: (p: ComponentPropsWithoutRef<"p">) => <p className="text-base text-gray-700 my-2.5 leading-7" {...p} />,
-  ul: (p: ComponentPropsWithoutRef<"ul">) => <ul className="list-disc pl-5 my-3 text-base text-gray-700 space-y-1.5" {...p} />,
-  ol: (p: ComponentPropsWithoutRef<"ol">) => <ol className="list-decimal pl-5 my-3 text-base text-gray-700 space-y-1.5" {...p} />,
+  h1: (p: ComponentPropsWithoutRef<"h1">) => <h1 className="text-2xl font-bold mt-5 mb-3 text-gray-900 tracking-tight" {...p} />,
+  h2: (p: ComponentPropsWithoutRef<"h2">) => <h2 className="text-xl font-semibold mt-5 mb-3 text-gray-900 tracking-tight" {...p} />,
+  h3: (p: ComponentPropsWithoutRef<"h3">) => <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-800" {...p} />,
+  p: (p: ComponentPropsWithoutRef<"p">) => <p className="text-lg text-gray-700 my-2.5 leading-8" {...p} />,
+  ul: (p: ComponentPropsWithoutRef<"ul">) => <ul className="list-disc pl-5 my-3 text-lg text-gray-700 space-y-1.5" {...p} />,
+  ol: (p: ComponentPropsWithoutRef<"ol">) => <ol className="list-decimal pl-5 my-3 text-lg text-gray-700 space-y-1.5" {...p} />,
   li: (p: ComponentPropsWithoutRef<"li">) => <li className="leading-7" {...p} />,
   strong: (p: ComponentPropsWithoutRef<"strong">) => <strong className="font-semibold text-gray-900" {...p} />,
   em: (p: ComponentPropsWithoutRef<"em">) => <em className="italic text-gray-600" {...p} />,
@@ -249,7 +249,7 @@ export default function Home() {
                 onChange={(e) => setUserRequest(e.target.value)}
                 placeholder="e.g. Our campaign performance has dropped 30% in 60 days. CAC is up, conversion rates are down. What's wrong and what should we do?"
                 rows={4}
-                className="w-full rounded-xl px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-y border border-gray-200 bg-gray-50"
+                className="w-full rounded-xl px-4 py-3 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-y border border-gray-200 bg-gray-50"
               />
             </div>
 
@@ -372,7 +372,7 @@ export default function Home() {
                           setUserRequest(step);
                           window.scrollTo({ top: 0, behavior: "smooth" });
                         }}
-                        className="w-full text-left px-4 py-3 rounded-xl border border-gray-200 text-base text-gray-700 hover:text-gray-900 hover:border-indigo-300 hover:bg-indigo-50 transition-all flex items-start gap-3 bg-gray-50"
+                        className="w-full text-left px-4 py-3 rounded-xl border border-gray-200 text-lg text-gray-700 hover:text-gray-900 hover:border-indigo-300 hover:bg-indigo-50 transition-all flex items-start gap-3 bg-gray-50"
                       >
                         <span className="flex-shrink-0 mt-0.5 text-xs font-bold px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700">
                           {i + 1}
@@ -402,7 +402,7 @@ export default function Home() {
                   onChange={(e) => setFollowUp(e.target.value)}
                   placeholder="e.g. The recommendation to target window unit owners is incorrect for our business — we only service central air systems. Please revise the campaign strategy accordingly."
                   rows={3}
-                  className="w-full rounded-xl px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-y mb-4 border border-gray-200 bg-gray-50"
+                  className="w-full rounded-xl px-4 py-3 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-y mb-4 border border-gray-200 bg-gray-50"
                 />
                 <div className="flex items-center justify-between gap-4">
                   <p className="text-xs text-gray-400">
