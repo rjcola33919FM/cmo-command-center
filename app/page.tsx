@@ -8,12 +8,12 @@ import { AGENTS, FLOWS, type AgentKey, type FlowKey } from "@/app/lib/agents";
 // ─── Markdown Renderer ───────────────────────────────────────────────────────
 
 const mdComponents = {
-  h1: (p: ComponentPropsWithoutRef<"h1">) => <h1 className="text-lg font-bold mt-4 mb-2 text-white" {...p} />,
-  h2: (p: ComponentPropsWithoutRef<"h2">) => <h2 className="text-base font-bold mt-4 mb-2 text-white/90" {...p} />,
-  h3: (p: ComponentPropsWithoutRef<"h3">) => <h3 className="text-sm font-semibold mt-3 mb-1 text-white/80" {...p} />,
-  p: (p: ComponentPropsWithoutRef<"p">) => <p className="text-sm text-white/70 my-2 leading-relaxed" {...p} />,
-  ul: (p: ComponentPropsWithoutRef<"ul">) => <ul className="list-disc pl-5 my-2 text-sm text-white/70 space-y-1" {...p} />,
-  ol: (p: ComponentPropsWithoutRef<"ol">) => <ol className="list-decimal pl-5 my-2 text-sm text-white/70 space-y-1" {...p} />,
+  h1: (p: ComponentPropsWithoutRef<"h1">) => <h1 className="text-xl font-bold mt-4 mb-2 text-white" {...p} />,
+  h2: (p: ComponentPropsWithoutRef<"h2">) => <h2 className="text-lg font-bold mt-4 mb-2 text-white/90" {...p} />,
+  h3: (p: ComponentPropsWithoutRef<"h3">) => <h3 className="text-base font-semibold mt-3 mb-1 text-white/80" {...p} />,
+  p: (p: ComponentPropsWithoutRef<"p">) => <p className="text-base text-white/70 my-2 leading-relaxed" {...p} />,
+  ul: (p: ComponentPropsWithoutRef<"ul">) => <ul className="list-disc pl-5 my-2 text-base text-white/70 space-y-1" {...p} />,
+  ol: (p: ComponentPropsWithoutRef<"ol">) => <ol className="list-decimal pl-5 my-2 text-base text-white/70 space-y-1" {...p} />,
   li: (p: ComponentPropsWithoutRef<"li">) => <li className="leading-relaxed" {...p} />,
   strong: (p: ComponentPropsWithoutRef<"strong">) => <strong className="font-semibold text-white" {...p} />,
   em: (p: ComponentPropsWithoutRef<"em">) => <em className="italic text-white/60" {...p} />,
@@ -259,7 +259,7 @@ export default function Home() {
                 onChange={(e) => setUserRequest(e.target.value)}
                 placeholder="e.g. Our campaign performance has dropped 30% in 60 days. CAC is up, conversion rates are down. What's wrong and what should we do?"
                 rows={4}
-                className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none resize-y"
+                className="w-full rounded-xl px-4 py-3 text-base text-white placeholder-white/20 focus:outline-none resize-y"
                 style={{ background: "#161b27", border: "1px solid #ffffff15" }}
               />
             </div>
@@ -394,7 +394,7 @@ export default function Home() {
                           setUserRequest(step);
                           window.scrollTo({ top: 0, behavior: "smooth" });
                         }}
-                        className="w-full text-left px-4 py-3 rounded-xl border text-sm text-white/70 hover:text-white transition-all hover:border-white/20 flex items-start gap-3"
+                        className="w-full text-left px-4 py-3 rounded-xl border text-base text-white/70 hover:text-white transition-all hover:border-white/20 flex items-start gap-3"
                         style={{ background: "#161b27", borderColor: "#ffffff0f" }}
                       >
                         <span className="flex-shrink-0 mt-0.5 text-xs font-bold px-1.5 py-0.5 rounded" style={{ background: "#6366f122", color: "#818cf8" }}>
@@ -426,7 +426,7 @@ export default function Home() {
                   onChange={(e) => setFollowUp(e.target.value)}
                   placeholder="e.g. The recommendation to target window unit owners is incorrect for our business — we only service central air systems. Please revise the campaign strategy accordingly."
                   rows={3}
-                  className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none resize-y mb-4"
+                  className="w-full rounded-xl px-4 py-3 text-base text-white placeholder-white/20 focus:outline-none resize-y mb-4"
                   style={{ background: "#161b27", border: "1px solid #ffffff15" }}
                 />
                 <div className="flex items-center justify-between gap-4">
