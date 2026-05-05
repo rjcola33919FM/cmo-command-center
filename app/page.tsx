@@ -166,6 +166,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<OrchestrateResponse | null>(null);
+  const [followUp, setFollowUp] = useState("");
 
   function handleContextChange(id: string, value: string) {
     setContextFields((prev) => ({ ...prev, [id]: value }));
@@ -182,6 +183,7 @@ export default function Home() {
     if (!userRequest.trim()) return;
     setError("");
     setResult(null);
+    setFollowUp("");
     setLoading(true);
     try {
       const res = await fetch("/api/orchestrate", {
@@ -200,6 +202,15 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleFollowUp(e: React.FormEvent) {
+    e.preventDefault();
+    if (!followUp.trim()) return;
+    setUserRequest(followUp);
+    setFollowUp("");
+    setResult(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   return (
@@ -396,6 +407,43 @@ export default function Home() {
                 </div>
               </div>
             )}
+
+            {/* Follow-Up / Clarification Input */}
+            <div className="mt-8">
+              <h2 className="text-xs font-semibold text-white/30 uppercase tracking-widest mb-4">
+                Clarify, Correct, or Go Deeper
+              </h2>
+              <form
+                onSubmit={handleFollowUp}
+                className="rounded-2xl border p-6"
+                style={{ background: "#0d1117", borderColor: "#ffffff0f" }}
+              >
+                <p className="text-xs text-white/40 mb-4">
+                  Disagree with a finding? Want to redirect the analysis? Type your follow-up and run a new chain.
+                </p>
+                <textarea
+                  value={followUp}
+                  onChange={(e) => setFollowUp(e.target.value)}
+                  placeholder="e.g. The recommendation to target window unit owners is incorrect for our business — we only service central air systems. Please revise the campaign strategy accordingly."
+                  rows={3}
+                  className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none resize-y mb-4"
+                  style={{ background: "#161b27", border: "1px solid #ffffff15" }}
+                />
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-xs text-white/20">
+                    This will re-run the full agent chain with your updated request.
+                  </p>
+                  <button
+                    type="submit"
+                    disabled={!followUp.trim()}
+                    className="flex-shrink-0 px-6 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                    style={{ background: "#6366f1" }}
+                  >
+                    Re-run with Clarification →
+                  </button>
+                </div>
+              </form>
+            </div>
           </>
         )}
 
