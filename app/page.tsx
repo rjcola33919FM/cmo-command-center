@@ -8,25 +8,25 @@ import { AGENTS, FLOWS, type AgentKey, type FlowKey } from "@/app/lib/agents";
 // ─── Markdown Renderer ───────────────────────────────────────────────────────
 
 const mdComponents = {
-  h1: (p: ComponentPropsWithoutRef<"h1">) => <h1 className="text-xl font-bold mt-4 mb-2 text-white" {...p} />,
-  h2: (p: ComponentPropsWithoutRef<"h2">) => <h2 className="text-lg font-bold mt-4 mb-2 text-white/90" {...p} />,
-  h3: (p: ComponentPropsWithoutRef<"h3">) => <h3 className="text-base font-semibold mt-3 mb-1 text-white/80" {...p} />,
-  p: (p: ComponentPropsWithoutRef<"p">) => <p className="text-base text-white/70 my-2 leading-relaxed" {...p} />,
-  ul: (p: ComponentPropsWithoutRef<"ul">) => <ul className="list-disc pl-5 my-2 text-base text-white/70 space-y-1" {...p} />,
-  ol: (p: ComponentPropsWithoutRef<"ol">) => <ol className="list-decimal pl-5 my-2 text-base text-white/70 space-y-1" {...p} />,
-  li: (p: ComponentPropsWithoutRef<"li">) => <li className="leading-relaxed" {...p} />,
+  h1: (p: ComponentPropsWithoutRef<"h1">) => <h1 className="text-xl font-bold mt-5 mb-3 text-white tracking-tight" {...p} />,
+  h2: (p: ComponentPropsWithoutRef<"h2">) => <h2 className="text-lg font-semibold mt-5 mb-3 text-white tracking-tight" {...p} />,
+  h3: (p: ComponentPropsWithoutRef<"h3">) => <h3 className="text-base font-semibold mt-4 mb-2 text-white/95" {...p} />,
+  p: (p: ComponentPropsWithoutRef<"p">) => <p className="text-base text-white/85 my-2.5 leading-7" {...p} />,
+  ul: (p: ComponentPropsWithoutRef<"ul">) => <ul className="list-disc pl-5 my-3 text-base text-white/85 space-y-1.5" {...p} />,
+  ol: (p: ComponentPropsWithoutRef<"ol">) => <ol className="list-decimal pl-5 my-3 text-base text-white/85 space-y-1.5" {...p} />,
+  li: (p: ComponentPropsWithoutRef<"li">) => <li className="leading-7" {...p} />,
   strong: (p: ComponentPropsWithoutRef<"strong">) => <strong className="font-semibold text-white" {...p} />,
-  em: (p: ComponentPropsWithoutRef<"em">) => <em className="italic text-white/60" {...p} />,
-  a: (p: ComponentPropsWithoutRef<"a">) => <a className="text-blue-400 underline" target="_blank" rel="noreferrer" {...p} />,
-  blockquote: (p: ComponentPropsWithoutRef<"blockquote">) => <blockquote className="border-l-4 border-white/20 pl-4 my-3 text-white/50 italic" {...p} />,
-  hr: () => <hr className="my-4 border-white/10" />,
+  em: (p: ComponentPropsWithoutRef<"em">) => <em className="italic text-white/75" {...p} />,
+  a: (p: ComponentPropsWithoutRef<"a">) => <a className="text-indigo-400 underline underline-offset-2 hover:text-indigo-300" target="_blank" rel="noreferrer" {...p} />,
+  blockquote: (p: ComponentPropsWithoutRef<"blockquote">) => <blockquote className="border-l-4 border-white/25 pl-4 my-4 text-white/65 italic" {...p} />,
+  hr: () => <hr className="my-5 border-white/10" />,
   table: (p: ComponentPropsWithoutRef<"table">) => (
-    <div className="overflow-x-auto my-3">
-      <table className="min-w-full border-collapse text-sm" {...p} />
+    <div className="overflow-x-auto my-4">
+      <table className="min-w-full border-collapse text-base" {...p} />
     </div>
   ),
-  th: (p: ComponentPropsWithoutRef<"th">) => <th className="border border-white/20 bg-white/5 px-3 py-2 text-left font-semibold text-white/80" {...p} />,
-  td: (p: ComponentPropsWithoutRef<"td">) => <td className="border border-white/10 px-3 py-2 text-white/60" {...p} />,
+  th: (p: ComponentPropsWithoutRef<"th">) => <th className="border border-white/15 bg-white/8 px-4 py-2.5 text-left font-semibold text-white/95" {...p} />,
+  td: (p: ComponentPropsWithoutRef<"td">) => <td className="border border-white/10 px-4 py-2.5 text-white/80" {...p} />,
 };
 
 function Markdown({ children }: { children: string }) {
@@ -118,10 +118,10 @@ function AgentCard({ result, index, total }: { result: AgentResult; index: numbe
             <div className="font-semibold text-sm text-white">{result.name}</div>
             <div className="text-xs mt-0.5" style={{ color: meta.border }}>{result.role}</div>
           </div>
-          <span className="text-white/40 text-lg ml-4">{open ? "−" : "+"}</span>
+          <span className="text-white/55 text-lg ml-4">{open ? "−" : "+"}</span>
         </button>
         {open && (
-          <div className="p-4" style={{ background: "#0d1117" }}>
+          <div className="p-5" style={{ background: "#1f1f1f" }}>
             <Markdown>{result.response}</Markdown>
           </div>
         )}
@@ -135,12 +135,12 @@ function AgentCard({ result, index, total }: { result: AgentResult; index: numbe
 function SynthesisPanel({ synthesis }: { synthesis: string }) {
   return (
     <div className="rounded-2xl overflow-hidden border" style={{ borderColor: "#3b82f655" }}>
-      <div className="px-5 py-3 flex items-center gap-3" style={{ background: "#1e3a5f" }}>
+      <div className="px-5 py-4 flex items-center gap-3" style={{ background: "#1e3a5f" }}>
         <div className="w-2 h-2 rounded-full bg-blue-400" />
         <span className="font-semibold text-white text-sm">CMO Executive Synthesis</span>
-        <span className="text-white/30 text-xs ml-auto">Final Board-Ready Recommendation</span>
+        <span className="text-white/50 text-xs ml-auto">Final Board-Ready Recommendation</span>
       </div>
-      <div className="p-6" style={{ background: "#0d1117" }}>
+      <div className="p-7" style={{ background: "#1a1a1a" }}>
         <Markdown>{synthesis}</Markdown>
       </div>
     </div>
@@ -214,11 +214,11 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen" style={{ background: "#080c14", color: "#fff" }}>
+    <main className="min-h-screen" style={{ background: "#111111", color: "#fff" }}>
       {/* Header */}
       <div
         className="border-b px-6 py-4 flex items-center justify-between"
-        style={{ borderColor: "#ffffff0f", background: "#0d1117" }}
+        style={{ borderColor: "#ffffff18", background: "#1a1a1a" }}
       >
         <div>
           <span className="font-bold text-white text-lg tracking-tight">CMO Command Center</span>
@@ -239,7 +239,7 @@ export default function Home() {
               {meta.name.replace(" GPT", "")}
             </span>
           ))}
-          <span className="text-xs text-white/30">+4 more</span>
+          <span className="text-xs text-white/50">+4 more</span>
         </div>
       </div>
 
@@ -248,7 +248,7 @@ export default function Home() {
         <form onSubmit={handleSubmit}>
           <div
             className="rounded-2xl border p-6 mb-6"
-            style={{ background: "#0d1117", borderColor: "#ffffff0f" }}
+            style={{ background: "#1a1a1a", borderColor: "#ffffff18" }}
           >
             <div className="mb-4">
               <label className="block text-sm font-semibold text-white/70 mb-2">
@@ -259,15 +259,15 @@ export default function Home() {
                 onChange={(e) => setUserRequest(e.target.value)}
                 placeholder="e.g. Our campaign performance has dropped 30% in 60 days. CAC is up, conversion rates are down. What's wrong and what should we do?"
                 rows={4}
-                className="w-full rounded-xl px-4 py-3 text-base text-white placeholder-white/20 focus:outline-none resize-y"
-                style={{ background: "#161b27", border: "1px solid #ffffff15" }}
+                className="w-full rounded-xl px-4 py-3 text-base text-white placeholder-white/35 focus:outline-none resize-y"
+                style={{ background: "#252525", border: "1px solid #ffffff15" }}
               />
             </div>
 
             <button
               type="button"
               onClick={() => setShowContext(!showContext)}
-              className="text-xs text-white/40 hover:text-white/60 transition-colors mb-4 flex items-center gap-1"
+              className="text-xs text-white/55 hover:text-white/60 transition-colors mb-4 flex items-center gap-1"
             >
               {showContext ? "▾" : "▸"} {showContext ? "Hide" : "Add"} business context (optional)
             </button>
@@ -284,8 +284,8 @@ export default function Home() {
                       placeholder={field.placeholder}
                       value={contextFields[field.id] ?? ""}
                       onChange={(e) => handleContextChange(field.id, e.target.value)}
-                      className="w-full rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:outline-none"
-                      style={{ background: "#161b27", border: "1px solid #ffffff15" }}
+                      className="w-full rounded-lg px-3 py-2 text-sm text-white placeholder-white/35 focus:outline-none"
+                      style={{ background: "#252525", border: "1px solid #ffffff15" }}
                     />
                   </div>
                 ))}
@@ -295,7 +295,7 @@ export default function Home() {
             {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
 
             <div className="flex items-center justify-between gap-4">
-              <p className="text-xs text-white/30">
+              <p className="text-xs text-white/50">
                 Agent chain is detected automatically from your request.
               </p>
               <button
@@ -314,9 +314,9 @@ export default function Home() {
         {loading && (
           <div
             className="rounded-2xl border p-10 text-center mb-6"
-            style={{ background: "#0d1117", borderColor: "#ffffff0f" }}
+            style={{ background: "#1a1a1a", borderColor: "#ffffff18" }}
           >
-            <p className="text-white/40 text-sm">
+            <p className="text-white/55 text-sm">
               Running agent chain — this may take 30–90 seconds depending on the flow...
             </p>
           </div>
@@ -328,14 +328,14 @@ export default function Home() {
             {/* Flow Header */}
             <div
               className="rounded-2xl border p-5 mb-6"
-              style={{ background: "#0d1117", borderColor: "#ffffff0f" }}
+              style={{ background: "#1a1a1a", borderColor: "#ffffff18" }}
             >
               <div className="flex items-center gap-4 flex-wrap">
                 <div>
-                  <div className="text-xs text-white/30 mb-1">Detected Flow</div>
+                  <div className="text-xs text-white/50 mb-1">Detected Flow</div>
                   <FlowBadge flowKey={result.flowKey} flowName={result.flowName} />
                 </div>
-                <div className="text-white/20 text-xl hidden md:block">→</div>
+                <div className="text-white/40 text-xl hidden md:block">→</div>
                 <div className="flex flex-wrap gap-2">
                   {result.agentResults.map((r, i) => {
                     const meta = AGENTS[r.agent];
@@ -355,7 +355,7 @@ export default function Home() {
 
             {/* Agent Pipeline */}
             <div className="mb-8">
-              <h2 className="text-xs font-semibold text-white/30 uppercase tracking-widest mb-4">
+              <h2 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">
                 Agent Pipeline — {result.agentResults.length} agents
               </h2>
               {result.agentResults.map((r, i) => (
@@ -366,7 +366,7 @@ export default function Home() {
             {/* CMO Synthesis */}
             {result.synthesis && (
               <div>
-                <h2 className="text-xs font-semibold text-white/30 uppercase tracking-widest mb-4">
+                <h2 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">
                   Final Executive Recommendation
                 </h2>
                 <SynthesisPanel synthesis={result.synthesis} />
@@ -376,14 +376,14 @@ export default function Home() {
             {/* Next Steps */}
             {result.nextSteps && result.nextSteps.length > 0 && (
               <div className="mt-8">
-                <h2 className="text-xs font-semibold text-white/30 uppercase tracking-widest mb-4">
+                <h2 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">
                   Suggested Next Steps
                 </h2>
                 <div
                   className="rounded-2xl border p-6"
-                  style={{ background: "#0d1117", borderColor: "#6366f133" }}
+                  style={{ background: "#1a1a1a", borderColor: "#6366f133" }}
                 >
-                  <p className="text-xs text-white/40 mb-4">
+                  <p className="text-xs text-white/55 mb-4">
                     Click any prompt below to continue the analysis.
                   </p>
                   <div className="space-y-3">
@@ -395,7 +395,7 @@ export default function Home() {
                           window.scrollTo({ top: 0, behavior: "smooth" });
                         }}
                         className="w-full text-left px-4 py-3 rounded-xl border text-base text-white/70 hover:text-white transition-all hover:border-white/20 flex items-start gap-3"
-                        style={{ background: "#161b27", borderColor: "#ffffff0f" }}
+                        style={{ background: "#252525", borderColor: "#ffffff18" }}
                       >
                         <span className="flex-shrink-0 mt-0.5 text-xs font-bold px-1.5 py-0.5 rounded" style={{ background: "#6366f122", color: "#818cf8" }}>
                           {i + 1}
@@ -410,15 +410,15 @@ export default function Home() {
 
             {/* Follow-Up / Clarification Input */}
             <div className="mt-8">
-              <h2 className="text-xs font-semibold text-white/30 uppercase tracking-widest mb-4">
+              <h2 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">
                 Clarify, Correct, or Go Deeper
               </h2>
               <form
                 onSubmit={handleFollowUp}
                 className="rounded-2xl border p-6"
-                style={{ background: "#0d1117", borderColor: "#ffffff0f" }}
+                style={{ background: "#1a1a1a", borderColor: "#ffffff18" }}
               >
-                <p className="text-xs text-white/40 mb-4">
+                <p className="text-xs text-white/55 mb-4">
                   Disagree with a finding? Want to redirect the analysis? Type your follow-up and run a new chain.
                 </p>
                 <textarea
@@ -426,11 +426,11 @@ export default function Home() {
                   onChange={(e) => setFollowUp(e.target.value)}
                   placeholder="e.g. The recommendation to target window unit owners is incorrect for our business — we only service central air systems. Please revise the campaign strategy accordingly."
                   rows={3}
-                  className="w-full rounded-xl px-4 py-3 text-base text-white placeholder-white/20 focus:outline-none resize-y mb-4"
-                  style={{ background: "#161b27", border: "1px solid #ffffff15" }}
+                  className="w-full rounded-xl px-4 py-3 text-base text-white placeholder-white/35 focus:outline-none resize-y mb-4"
+                  style={{ background: "#252525", border: "1px solid #ffffff15" }}
                 />
                 <div className="flex items-center justify-between gap-4">
-                  <p className="text-xs text-white/20">
+                  <p className="text-xs text-white/40">
                     This will re-run the full agent chain with your updated request.
                   </p>
                   <button
@@ -451,9 +451,9 @@ export default function Home() {
         {!result && !loading && (
           <div
             className="rounded-2xl border p-6"
-            style={{ background: "#0d1117", borderColor: "#ffffff0f" }}
+            style={{ background: "#1a1a1a", borderColor: "#ffffff18" }}
           >
-            <div className="text-xs font-semibold text-white/30 uppercase tracking-widest mb-4">
+            <div className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">
               Available Flows — click to pre-fill
             </div>
             <div className="grid md:grid-cols-2 gap-3">
@@ -461,12 +461,12 @@ export default function Home() {
                 <div
                   key={key}
                   className="p-3 rounded-xl border cursor-pointer hover:border-white/20 transition-colors"
-                  style={{ borderColor: "#ffffff08", background: "#161b27" }}
+                  style={{ borderColor: "#ffffff08", background: "#252525" }}
                   onClick={() => setUserRequest(`[${flow.name}] `)}
                 >
                   <FlowBadge flowKey={key} flowName={flow.name} />
-                  <p className="text-xs text-white/30 mt-2">{flow.description}</p>
-                  <p className="text-xs text-white/20 mt-1">
+                  <p className="text-xs text-white/50 mt-2">{flow.description}</p>
+                  <p className="text-xs text-white/40 mt-1">
                     {flow.chain.length} agents · {flow.chain.map((a) => AGENTS[a].name).join(" → ")}
                   </p>
                 </div>
